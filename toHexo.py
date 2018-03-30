@@ -104,14 +104,14 @@ class Exporter(Analyzer):
         import os
         filename = os.path.join("./markdown/", title)
         # 名字中可能包含特殊字符出错，特别是在windows下。101行的代码已经对/进行了处理。
-        # 如果问题很多懒得解决，把152行的注释放开做稍微修改，用文章url里的数字作为文章名字
+        # 如果问题很多懒得解决，把154行的注释放开做稍微修改，用文章url里的数字作为文章名字
         try:
             f = codecs.open(filename + '.md', 'w', encoding='utf-8')
             self.export_2_markdown(f, detail)
             f.close()
         except IOError as ioerror:
             print '文件名字中可能包含特殊字符出错，特别是在windows下。101行的代码已经对/进行了处理。' \
-                  '如果问题很多懒得解决，把152行的注释放开做稍微修改，用文章url里的数字作为文章名字 \n', ioerror
+                  '如果问题很多懒得解决，把154行的注释放开做稍微修改，用文章url里的数字作为文章名字 \n', ioerror
         return
 
 
