@@ -1,8 +1,9 @@
 # csdn_to_hexo_markdown
 
 # 前言
-  修改自[网络代码](https://github.com/gaocegege/csdn-blog-export)，但是原代码在解析html时出错，应该是csdn的前端中间改了。
-  网络代码可以转换成html和markdown，但是我修改成只能转markdown而且还进行了很多优化。增加了分类、标签等。
+  使用了开源项目[html2text](https://github.com/aaronsw/html2text)
+　修改自[网络代码](https://github.com/gaocegege/csdn-blog-export)，但是原代码在解析html时出错，应该是csdn的前端中间改了。
+ 网络代码可以转换成html和markdown，但是我修改成只能转markdown而且还进行了很多优化。增加了分类、标签等。
   
 # 介绍
 　代码把csdn的博客转成hexo接受的形式markdown。代码很全面，把hexo写文章时需要的头（title、tags、categories、copyright）都生成了。
