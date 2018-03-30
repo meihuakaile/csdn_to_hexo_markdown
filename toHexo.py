@@ -39,7 +39,7 @@ class PrintLayer(object):
 
     @staticmethod
     def printOver():
-        print 'All the posts has been downloaded. If there is any problem, feel free to file issues in https://github.com/gaocegege/csdn-blog-export/issues'
+        print 'All the posts has been downloaded. If there is any problem, feel free to file issues in https://github.com/meihuakaile/csdn_to_hexo_markdown/issues'
 
 
 class Analyzer(object):
