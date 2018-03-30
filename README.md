@@ -14,20 +14,20 @@
   只转化某篇文章
 ## 方法1：
  转化用户name的所有文章
-　```
+```
  python toHexo.py --name u123456 --type markdown
- ```
+```
 ## 方法2：
 　转化用户第page页的文章
-　```
-   python toHexo.py --name u123456 --type markdown --page 1
-  ```
+```
+  python toHexo.py --name u123456 --type markdown --page 1
+```
 ## 方法3：
 　 只转化某篇文章url
-　```
-   python toHexo.py --url https://blog.csdn.net/u123456/article/details/51429540
-  ```
+```
+  python toHexo.py --url https://blog.csdn.net/u123456/article/details/51429540
+```
 # 问题
 　1.名字中可能包含特殊字符出错，特别是在windows下。101行的代码已经对/进行了处理。
-   如果问题很多懒得解决，把154行的注释放开做稍微修改，用文章url里的数字作为文章名字。
+ 如果问题很多懒得解决，把154行的注释放开做稍微修改，用文章url里的数字作为文章名字。
   2.文章使用网络上的代码，因此可能会有多余的代码，没有删除可能。
