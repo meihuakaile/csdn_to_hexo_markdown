@@ -58,7 +58,8 @@ class Analyzer(object):
 
     # get the detail of the article
     def get_content(self, soup):
-        return soup.find(id='container').find(id='body').find(id='main').find(class_='main')
+        #return soup.find(id='container').find(id='body').find(id='main').find(class_='main')
+        return soup.find('main').find('article')
 
 
 class Exporter(Analyzer):
@@ -71,24 +72,29 @@ class Exporter(Analyzer):
     def export_2_markdown(self, f, detail):
         f.write("---\n")
         # 标题
-        title = detail.find(class_='article_title').h1.span.a.getText().strip()
+        #title = detail.find(class_='article_title').h1.span.a.getText().strip()
+        title = detail.h1.getText().replace('/', ' ').strip()
         f.write("title: " + title + "\n")
+        # 时间
+        date = detail.find("span", class_="time").get_text().replace('年','-').replace('月','-').replace('日','')
+        f.write("date: " + date + "\n")
         # 标签
-        link_categories = detail.find(class_="link_categories")
+        #link_categories = detail.find(class_="link_categories")
+        link_categories = detail.find(class_="article_tags clearfix csdn-tracking-statistics tracking-click")
         tags = link_categories.find_all("a") if link_categories is not None else []
         taglist = []
         for tag in tags:
             taglist.append(tag.get_text().strip().encode('utf-8'))
         f.write("tags: " + str(taglist).decode('string_escape') + "\n")
         # 种类,去掉csdn上的数字
-        category_r = detail.find(class_="category_r")
-        categories = category_r.find_all("span") if category_r is not None else []
-        category_list = []
-        for category in categories:
-            all = category.get_text().strip().encode('utf-8')
-            num = category.find('em').get_text().strip().encode('utf-8')
-            category_list.append(all[: -len(num)])
-        f.write("categories: " + str(category_list).decode('string_escape') + "\n")
+        #category_r = detail.find(class_="category_r")
+        #categories = category_r.find_all("span") if category_r is not None else []
+        #category_list = []
+        #for category in categories:
+        #    all = category.get_text().strip().encode('utf-8')
+        #    num = category.find('em').get_text().strip().encode('utf-8')
+        #    category_list.append(all[: -len(num)])
+        #f.write("categories: " + str(category_list).decode('string_escape') + "\n")
         # 如果主题配置了版本，没有就把这行注释掉
         f.write("copyright: true\n")
         f.write("---\n")
@@ -99,8 +105,10 @@ class Exporter(Analyzer):
     def export(self, link):
         html_doc = self.get(link)
         soup = BeautifulSoup(html_doc, 'lxml')
-        detail = self.get_content(soup).find(id='article_details')
-        title = detail.find(class_='article_title').h1.span.a.getText().replace('/', ' ').strip()
+        #detail = self.get_content(soup).find(id='article_details')
+        #title = detail.find(class_='article_title').h1.span.a.getText().replace('/', ' ').strip()
+        detail = self.get_content(soup)
+        title = detail.h1.getText().replace('/', ' ').strip()
         import os
         filename = os.path.join("./markdown/", title)
         # 名字中可能包含特殊字符出错，特别是在windows下。101行的代码已经对/进行了处理。
@@ -126,9 +134,12 @@ class Parser(Analyzer):
     # get the articles' link
     def get_one_page_article_url(self, html_doc):
         soup = BeautifulSoup(html_doc)
-        res = soup.find('div', class_='list_item_new').find_all('div', class_='list_item clearfix article_item')
+        #res = soup.find('div', class_='list_item_new').find_all('div', class_='list_item clearfix article_item')
+        res = soup.find('ul', class_='blog-units blog-units-box').find_all('li', class_='blog-unit')
         for ele in res:
-            self.article_list.append(ele.find(class_='article_title').h1.span.a['href'])
+            #print ele
+            #self.article_list.append(ele.find(class_='href').h1.span.a['href'])
+            self.article_list.append(ele.a['href'])
 
     # get the page of the blog
     def getPageNum(self, html_doc):
