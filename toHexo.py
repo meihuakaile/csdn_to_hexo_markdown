@@ -8,6 +8,7 @@ import codecs
 import html2text
 import argparse
 import sys
+import re
 
 reload(sys)  # Python2.5 初始化后会删除 sys.setdefaultencoding 这个方法，我们需要重新载入
 sys.setdefaultencoding('utf-8')
@@ -72,29 +73,25 @@ class Exporter(Analyzer):
     def export_2_markdown(self, f, detail):
         f.write("---\n")
         # 标题
-        #title = detail.find(class_='article_title').h1.span.a.getText().strip()
         title = detail.h1.getText().replace('/', ' ').strip()
         f.write("title: " + title + "\n")
         # 时间
         date = detail.find("span", class_="time").get_text().replace('年','-').replace('月','-').replace('日','')
         f.write("date: " + date + "\n")
         # 标签
-        #link_categories = detail.find(class_="link_categories")
-        link_categories = detail.find(class_="article_tags clearfix csdn-tracking-statistics tracking-click")
+        link_categories = detail.find(class_="tags-box artic-tag-box")
         tags = link_categories.find_all("a") if link_categories is not None else []
         taglist = []
         for tag in tags:
             taglist.append(tag.get_text().strip().encode('utf-8'))
         f.write("tags: " + str(taglist).decode('string_escape') + "\n")
         # 种类,去掉csdn上的数字
-        #category_r = detail.find(class_="category_r")
-        #categories = category_r.find_all("span") if category_r is not None else []
-        #category_list = []
-        #for category in categories:
-        #    all = category.get_text().strip().encode('utf-8')
-        #    num = category.find('em').get_text().strip().encode('utf-8')
-        #    category_list.append(all[: -len(num)])
-        #f.write("categories: " + str(category_list).decode('string_escape') + "\n")
+        category_r = detail.find(class_="tags-box")
+        categories = category_r.find_all("a") if category_r is not None else []
+        category_list = []
+        for category in categories:
+            category_list.append(category.get_text().strip().encode('utf-8'))
+        f.write("categories: " + str(category_list).decode('string_escape') + "\n")
         # 如果主题配置了版本，没有就把这行注释掉
         f.write("copyright: true\n")
         f.write("---\n")
@@ -105,10 +102,8 @@ class Exporter(Analyzer):
     def export(self, link):
         html_doc = self.get(link)
         soup = BeautifulSoup(html_doc, 'lxml')
-        #detail = self.get_content(soup).find(id='article_details')
-        #title = detail.find(class_='article_title').h1.span.a.getText().replace('/', ' ').strip()
-        detail = self.get_content(soup)
-        title = detail.h1.getText().replace('/', ' ').strip()
+        detail = soup.find("div", class_='blog-content-box')
+        title = detail.find(class_='article-title-box').h1.getText().replace('/', ' ').strip()
         import os
         filename = os.path.join("./markdown/", title)
         # 名字中可能包含特殊字符出错，特别是在windows下。101行的代码已经对/进行了处理。
@@ -134,19 +129,23 @@ class Parser(Analyzer):
     # get the articles' link
     def get_one_page_article_url(self, html_doc):
         soup = BeautifulSoup(html_doc)
-        #res = soup.find('div', class_='list_item_new').find_all('div', class_='list_item clearfix article_item')
-        res = soup.find('ul', class_='blog-units blog-units-box').find_all('li', class_='blog-unit')
+        res = soup.find('div', class_='article-list').find_all('div', class_='article-item-box csdn-tracking-statistics')
         for ele in res:
-            #print ele
-            #self.article_list.append(ele.find(class_='href').h1.span.a['href'])
-            self.article_list.append(ele.a['href'])
+            self.article_list.append(ele.h4.a['href'])
 
     # get the page of the blog
     def getPageNum(self, html_doc):
         soup = BeautifulSoup(html_doc)
-        ul = soup.find("ul", class_="pagination justify-content-center")
-        pages = ul.find_all('a', class_="page-link")
-        self.page = int(pages[-2].get_text())
+        scripts = soup.find_all(re.compile("script"))
+        for script in scripts:
+            ss = script.get_text()
+            size = re.findall(r'pageSize.*?(\d+).*?;', ss)
+            total = re.findall(r'listTotal.*?(\d+).*?;', ss)
+            if size and total:
+                break
+        total = int(total[0])
+        size = int(size[0])
+        self.page = total/size if (total%size==0) else total/size + 1
         return self.page
 
     # get all the link
